@@ -45,6 +45,7 @@ for i in range(0, len(skus)):
 
     rating = driver.find_element_by_xpath("//span[@class='overall-rating']").text
     print("rating: " + rating)
+    table.write(row_num , 4, rating)
 
     reviews = driver.find_elements_by_xpath("//li[@class='review-item']")
     for review, nextFlag in lookAhead(reviews):
@@ -56,20 +57,22 @@ for i in range(0, len(skus)):
         d = date(year, month, day)
         print(d)
         if d > today - timedelta(days = 7):
-            print("add")
+            # print("add")
+            name = review.find_element_by_xpath(".//div['review-item-header hidden-xs hidden-sm col-md-4 col-lg-3']//button/div/strong").text
+            print(name)
+            title = review.find_element_by_xpath(".//h4[@class='review-title c-section-title heading-5 v-fw-medium  ']").text
+            review_text = review.find_element_by_xpath(".//div[@class='ugc-review-body body-copy-lg']/p").text
+            rating = review.find_element_by_xpath(".//div[@class='c-ratings-reviews-v2 v-small']/p").text
+                
+            table.write(row_num + 1, 0, name)
+            table.write(row_num + 1, 1, title)
+            table.write(row_num + 1, 2, d)
+            table.write(row_num + 1, 3, review_text)
+            table.write(row_num + 1, 4, rating.split(" ")[1])
+            row_num = row_num + 1
         else:
              break
-        name = review.find_element_by_xpath(".//div['ugc-author v-fw-medium body-copy-lg']/strong").text
-        title = review.find_element_by_xpath(".//h4[@class='review-title c-section-title heading-5 v-fw-medium  ']").text
-        review_text = review.find_element_by_xpath(".//div[@class='ugc-review-body body-copy-lg']/p").text
-        rating = review.find_element_by_xpath(".//div[@class='c-ratings-reviews-v2 v-small']/p").text
-            
-        table.write(row_num + 1, 0, name)
-        table.write(row_num + 1, 1, title)
-        table.write(row_num + 1, 2, submission_time)
-        table.write(row_num + 1, 3, review_text)
-        table.write(row_num + 1, 4, rating.split(" ")[1])
-        row_num = row_num + 1
+        
 
         if not nextFlag:
             next = driver.find_elements_by_link_text('next Page')

@@ -2,6 +2,11 @@ from selenium import webdriver
 from selenium.common.exceptions import NoSuchElementException
 from datetime import date
 from datetime import timedelta
+import xlrd
+import xlwt
+
+
+wdata = xlwt.Workbook()
 
 productsURL = "https://www.amazon.com/stores/page/91BC1940-51D9-4456-8B19-34927EE38C9D?ingress=2&visitId=60312336-c246-4ca6-a222-1cfd6fea3d0b&ref_=bl_dp_s_web_6263534011"
 baseURL = "https://www.amazon.com/"
@@ -32,6 +37,11 @@ for product in products:
 
 for productLink in productLinks:
     driver.get(productLink + "#customerReviews")
+    model = driver.find_element_by_xpath("//span[@class='a-size-large']").text.split(" ")[1]
+    print(model)
+    table = wdata.add_sheet(model)
+    row_num = 0
+
     try:
 
         # get the product review page link
@@ -43,6 +53,7 @@ for productLink in productLinks:
         # get current rating of the product
         rating = driver.find_element_by_xpath("//div[@class='a-text-left a-fixed-left-grid-col reviewNumericalSummary celwidget a-col-left']//span[@class='a-size-medium a-color-base']").text
         print("rating: " + rating)
+        table.write(row_num, 4, rating)
 
 
         # get reviews from the revew page
@@ -64,6 +75,13 @@ for productLink in productLinks:
                 title = reviewDiv.find_element_by_xpath(".//a[@data-hook='review-title']/span").text
                 review = reviewDiv.find_element_by_xpath(".//div[@class='a-row a-spacing-small review-data']/span/span").text
                 print("\n\nname: " + name + "\nrate: " + rate + "\ntitle: " + title + "\ntime: " + time + "\nreview: " + review)
+
+                table.write(row_num + 1, 0, name)
+                table.write(row_num + 1, 1, title)
+                table.write(row_num + 1, 2, d)
+                table.write(row_num + 1, 3, review)
+                table.write(row_num + 1, 4, rate)
+                row_num = row_num + 1
             else:
                 break
             if not nextFlag:
@@ -75,3 +93,4 @@ for productLink in productLinks:
         pass
 
 driver.close()
+wdata.save('Amazon.xls')
